@@ -1,7 +1,12 @@
 <?php
+require_once('mysql_connection.php');
 
 header('Content-type: text/json');
 $res = $_POST['aoData'];
+$chr = $_GET['Chr'];
+$effect = $_GET['Effect'];
+$disorder = $_GET['Disorder'];
+
 $sEcho = 0;
 $iDisplayStart = 0; // 起始索引
 $iDisplayLength = 0;//分页长度
@@ -35,22 +40,48 @@ if((int)$iSortCol_0==0){$sortCol="Chr";}elseif((int)$iSortCol_0==1){$sortCol="St
 
 $Array = Array(); 
 
-$conect = mysql_connect('localhost', 'jiangyi', 'jiangyi20160420') or die ("cannot connect database!"); 
-mysql_select_db('NPdenovo');
-mysql_query('set names utf8');
-
+//$sSearch = strtolower($sSearch);
 
 if($sSearch==''){
-$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder ORDER BY $sortCol $sSortDir_0";
+	if($chr=="All" && $effect=="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect=="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect!="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Effect='".$effect."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect=="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where disorder='".$disorder."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect!="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND Effect='".$effect."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect=="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND disorder='".$disorder."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect!="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Effect='".$effect."'  AND disorder='".$disorder."' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect!="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND Effect='".$effect."' AND disorder='".$disorder."' ORDER BY $sortCol $sSortDir_0";
+	}
 }else{
-$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	if($chr=="All" && $effect=="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect=="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect!="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Effect='".$effect."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect=="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where disorder='".$disorder."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect!="All" && $disorder=="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND Effect='".$effect."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect=="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND disorder='".$disorder."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr=="All" && $effect!="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Effect='".$effect."'  AND disorder='".$disorder."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}elseif($chr!="All" && $effect!="All" && $disorder!="All"){$each_query="select Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme from All_disorder where Chr='".$chr."' AND Effect='".$effect."' AND disorder='".$disorder."' AND concat(Chr,Start,End,Ref,Alt,Cytoband,Gene_region,disorder,Gene_symbol,Effect,Mutation_type,Total_damaging_score,Extreme) LIKE '%".$sSearch."%' ORDER BY $sortCol $sSortDir_0";
+	}
 }
 
 $array_list=array();
 $recordsTotal=0;
 $each_search_row=mysql_query($each_query);
 while($each_info=mysql_fetch_array($each_search_row)){
-	$d =  array($each_info[Chr],$each_info[Start],$each_info[End],$each_info[Ref],$each_info[Alt],$each_info[Cytoband],$each_info[Gene_region],$each_info[disorder],$each_info[Gene_symbol],$each_info[Effect],$each_info[Mutation_type],$each_info[Total_damaging_score],$each_info[Extreme]);
+
+	if(strlen($each_info[Ref])<=2 && strlen($each_info[Alt]) <= 2){
+	$d =  array($each_info[Chr],$each_info[Start],$each_info[End],$each_info[Ref],$each_info[Alt],$each_info[Cytoband],$each_info[Gene_region],$each_info[disorder],$each_info[Gene_symbol],$each_info[Effect],$each_info[Mutation_type],$each_info[Total_damaging_score],$each_info[Extreme],$each_info[Ref],$each_info[Alt]);
+	}elseif(strlen($each_info[Ref])>2 && strlen($each_info[Alt]) <= 2){
+		$str1 = substr($each_info[Ref],0,3)."&hellip;";
+		$d =  array($each_info[Chr],$each_info[Start],$each_info[End],$str1,$each_info[Alt],$each_info[Cytoband],$each_info[Gene_region],$each_info[disorder],$each_info[Gene_symbol],$each_info[Effect],$each_info[Mutation_type],$each_info[Total_damaging_score],$each_info[Extreme],$each_info[Ref],$each_info[Alt]);
+	}elseif(strlen($each_info[Ref])<=2 && strlen($each_info[Alt]) > 2){
+		$str1 = substr($each_info[Alt],0,3)."&hellip;";
+		$d =  array($each_info[Chr],$each_info[Start],$each_info[End],$each_info[Ref],$str1,$each_info[Cytoband],$each_info[Gene_region],$each_info[disorder],$each_info[Gene_symbol],$each_info[Effect],$each_info[Mutation_type],$each_info[Total_damaging_score],$each_info[Extreme],$each_info[Ref],$each_info[Alt]);
+	}elseif(strlen($each_info[Ref])<=2 && strlen($each_info[Alt]) > 2){
+		$str1 = substr($each_info[Ref],0,3)."&hellip;";
+		$str2 = substr($each_info[Alt],0,3)."&hellip;";
+		$d =  array($each_info[Chr],$each_info[Start],$each_info[End],$str1,$str2,$each_info[Cytoband],$each_info[Gene_region],$each_info[disorder],$each_info[Gene_symbol],$each_info[Effect],$each_info[Mutation_type],$each_info[Total_damaging_score],$each_info[Extreme],$each_info[Ref],$each_info[Alt]);
+	}
 
 	Array_push($Array, $d);
 	$recordsTotal++;
