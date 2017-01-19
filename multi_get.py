@@ -1,6 +1,7 @@
 import sys, re, getopt, os,time
 from multiprocessing import Pool,Manager
 from collections import defaultdict
+
 def usage():
     print("usage: python3 %s -option <argument>" %sys.argv[0])
     print("   -i     <STRING>   inputfile")
@@ -28,41 +29,37 @@ for opt, val in opts:
             database = val
 
 manager=Manager()
-#all_data=manager.dict()
-
+#函数，根据切割后的文件，生成一个点：行信息
 def run(lines,nu):
         cons=[]
         for line in lines:
-                #print(line)
                 con=line.strip()
                 tmp=con.split()
-                #print(tmp)
                 A=int(tmp[1])
                 B=int(tmp[2])
+				#写入chr,pos:对应的该行信息
                 for i in range(A,B+1):
                         cons.append(tmp[0]+"_"+str(i)+":"+"_".join(tmp)+"\n")
         with open("%d.tmp"%nu,'w') as A1:
                 A1.writelines(cons)
         print('%d is cleaned!'%nu)
+		
+#根据文件生成列表，取列表对应的内容
 f1=open(database,'r')
-#manager=Manager()
-#all_data=manager.dict()
 pool = Pool(processes = 10)
 ALLlines=f1.readlines()
 num=len(ALLlines)
 n=num//1000
-#for i in range(n+1):all_data[i]={}
-#print(len(all_data))
 time.sleep(2)
 B={}
 for i in range(n):
-        pool.apply_async(run, (ALLlines[i*1000:(i+1)*1000],i))
-		
+        pool.apply_async(run, (ALLlines[i*1000:(i+1)*1000],i))		
 pool.apply_async(run, (ALLlines[n*1000:num],i))
-
 pool.close()
 pool.join()
 f1.close()
+
+#合并每个cpu生成的结果文件，写入字典
 all_data=defaultdict(lambda:[])
 if os.path.exists('all.tmp'):os.system('rm all.tmp')
 os.system('cat *tmp >all.tmp')
@@ -71,6 +68,7 @@ with open('all.tmp','r') as A2:
                 tmp=line.strip().split(":")
                 all_data[tmp[0]].append(tmp[1])
 
+#根据输入文件和结果字典，进行匹配，输出匹配结果				
 fw=open(output,'w')
 f=open(input,'r')
 while 1:
