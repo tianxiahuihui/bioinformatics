@@ -1,0 +1,6 @@
+#绘制带error bar的柱状图
+#柱状图的高度是平均值, error bar则是通过t.test()计算得到95%置信区间
+#1.生成dataframe
+d = data.frame(x=c('A','B','C','D','E','F'),y=c(9.891094,18.02256,28.20093,34.44795,4.280318,5.15715),CI_min=c(8.458976,15.41622,19.98536,30.5622,3.361856,4.144212),CI_max=c(11.323211,20.62890,36.41649,38.3337,5.198781,6.170088))
+p <- ggplot(d,aes(x=x,y=y,fill=x))+geom_bar(stat="identity",position=position_dodge(width=0.6),width=0.25,alpha=0.95)
+p+theme_classic()+scale_y_continuous(expand=c(0,0),limits=c(0,40),breaks=seq(0,40, by=10))+geom_errorbar(aes(ymin=CI_min, ymax=CI_max,width=0.10), position=position_dodge(width=0.6))+scale_x_discrete(label=c('C>G\nG>C','T>C\nA>G','C>A\nG>T','C>T\nG>A','T>A\nA>T','T>G\nA>C'))+xlab("")+ylab("rare inherited SNVs (%)")
