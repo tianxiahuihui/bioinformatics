@@ -80,4 +80,22 @@ print(p)
 dev.off()
 
 
-#
+#绘制饼图#参考网址：http://blog.csdn.net/Bone_ACE/article/details/47455363
+library(ggplot2)
+type <- c("exonic","intronic","intergenic","splicing","upstream","downstream","UTR5","UTR3")
+nums <- c(571,12921,16703,6,165,208,61,318)
+df <- data.frame(type = type, nums = nums)
+label_value <- paste('(', round(df$nums/sum(df$nums) * 100, 1), '%)', sep = '') #生成比例
+label <- paste(df$type, label_value, sep = '')  #exonic(1.8%)
+p <- ggplot(data = df, mapping = aes(x = '', y = nums, fill = type)) + geom_bar(stat = 'identity', position = 'stack', width = 1)+
+      coord_polar(theta = "y")+
+      labs(x="",y="",title="")+#去掉标签
+      theme(axis.ticks = element_blank())+#去掉左上角短横线
+      theme(axis.text.x = element_blank())+ #去掉白色外框的数字
+      scale_fill_discrete(breaks = df$type, labels = label)#将标签带上百分比
+
+
+
+
+
+
