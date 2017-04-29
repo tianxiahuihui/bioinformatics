@@ -40,7 +40,7 @@ while 1:
 		else:
 			list2.append(list1[i])
 	line2 = '\t'.join(list2)
-	f2.write("%s\t" % (line2))
+	f2.write("%s\n" % (line2))
 
 f1.close()
 f2.close()
